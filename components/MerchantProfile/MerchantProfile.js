@@ -1,18 +1,60 @@
 import React from 'react';
-import {Platform, ScrollView, TouchableOpacity, Image, View, Text, StyleSheet, Animated } from 'react-native';
+import { StatusBar, Platform, ScrollView, TouchableOpacity, Image, View, Text, StyleSheet, Animated } from 'react-native';
 import PropTypes from  'prop-types';
 import Ajax from '../../services/Ajax';
+import AvatarCircle from '../../components/shared/AvatarCircle';
 
 
 const HEADER_MAX_HEIGHT = 200;
-const HEADER_MIN_HEIGHT = 60;
+const HEADER_MIN_HEIGHT = Platform.OS === 'ios' ? 60 : 73; 
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
+const BackBtn = ({navigate})=><TouchableOpacity style={{zIndex:2}} onPress={()=>{navigate.goBack();}}><Text> &#60; BACK</Text></TouchableOpacity>;
+
+const Filler = ({merchantData}) =>{
+  const img = {
+    uri: merchantData.media[0]
+  };
+  const profileImage = require('../../assets/images/profile-pic.png');
+  const followUserImg = require('../../assets/images/user_follow_add.imageset/follow_add.png');
+  const merchantIcon = require('../../assets/images/feed_merchant.imageset/feed_merchant.png');
+  const addIcon = require('../../assets/images/feed_add_promo.imageset/feed_add_promo.png');
+  const shareIcon = require('../../assets/images/feed_share.imageset/feed_share.png');
+  const likeIcon = require('../../assets/images/feed_like.imageset/feed_like.png');
+  const date = 'October 18, 2018';
+  return(
+    <View style={styles.fillerContainer}>
+      <View style={styles.itemTitleBar}>
+        <View style={styles.profileImgTitle}>
+          <Image style={styles.profileImg} source={profileImage} />
+          <View>
+            <Text style={styles.text}>{merchantData.title}</Text>
+            <Text style={styles.textDate}>{date}</Text>
+          </View>
+        </View>
+        <Image style={styles.followUserImg} source={followUserImg} />
+      </View>
+      <Image style={styles.itemImage} source={img} />
+      <View style={styles.descIconBar}>
+        <View style={styles.desc}>
+          <Text>{merchantData.title}</Text>
+          <Text style={styles.textClaimed}>1 out of 10</Text>
+        </View>
+        <View style={styles.iconBar}>
+          <Image style={styles.iconBarImg} source={merchantIcon} />
+          <Image style={styles.iconBarImg} source={addIcon} />
+          <Image style={styles.iconBarImg} source={shareIcon} />
+          <Image style={styles.iconBarImg} source={likeIcon} />
+          <Text>1</Text>
+        </View>
+      </View>
+    </View>
+  );
+
+};
+
+
+
 export default class MerchantProfile extends React.Component {
-  //   static propTypes ={
-  //  //  initialMerchantData: PropTypes.object.isRequired,
-  //    // onBack: PropTypes.func.isRequired
-  //   }
-  
  
     static navigationOptions = {
       header: null,
@@ -28,20 +70,19 @@ export default class MerchantProfile extends React.Component {
     }
     async componentDidMount(){
       const merchantData = await Ajax.fetchMerchantProfile(this.state.merchantData.key);
+      // console.log(merchantData);
+      // console.log(merchantData.user.avatar);
       this.setState({merchantData});
     }
+    _renderFiller = () => {
+      const data = Array.from({length: 30});
+      const Fillers = data.map((_,i)=><Filler merchantData={this.state.merchantData} key={i}/>);
+      return Fillers;
+    }
     render(){
-      const { merchantData } = this.state;
       const img = {
-        uri: merchantData.media[0]
+        uri: this.state.merchantData.media[0]
       };
-      const profileImage = require('../../assets/images/profile-pic.png');
-      const followUserImg = require('../../assets/images/user_follow_add.imageset/follow_add.png');
-      const merchantIcon = require('../../assets/images/feed_merchant.imageset/feed_merchant.png');
-      const addIcon = require('../../assets/images/feed_add_promo.imageset/feed_add_promo.png');
-      const shareIcon = require('../../assets/images/feed_share.imageset/feed_share.png');
-      const likeIcon = require('../../assets/images/feed_like.imageset/feed_like.png');
-      const date = 'October 18, 2018';
 
       const scrollY = Animated.add(
         this.state.scrollY,
@@ -55,129 +96,37 @@ export default class MerchantProfile extends React.Component {
 
       return(
         <View style={styles.container}>
-          <Animated.View  
-            pointerEvents="none"
-            style={[
-              styles.header,
-              { transform: [{ translateY: headerTranslate }] },
-            ]}>
-            <Image style={styles.headerBackgroundImage} source={img} />
-          </Animated.View>
-          <ScrollView 
+          <StatusBar  translucent={false}  />
+          <BackBtn navigate={this.props.navigation} />
+      
+          <Animated.ScrollView 
             styles={styles.fill}
-            scrollEventThrottle={16}
+            scrollEventThrottle={1}
             onScroll={Animated.event(
               [{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }]
             )}
             contentInset={{
               top: HEADER_MAX_HEIGHT,
             }}
-            contentOffset={{
-              y: -HEADER_MAX_HEIGHT,
-            }}
+          
           >
-            <View style={styles.itemTitleBar}>
-              <View style={styles.profileImgTitle}>
-                <Image style={styles.profileImg} source={profileImage} />
-                <View>
-                  <Text style={styles.text}>{merchantData.title}</Text>
-                  <Text style={styles.textDate}>{date}</Text>
-                </View>
-              </View>
-              <Image style={styles.followUserImg} source={followUserImg} />
-                    
+            <View style={styles.scrollViewContent}>
+              {this._renderFiller()}
             </View>
-            <Image style={styles.itemImage} source={img} />
-            <View style={styles.descIconBar}>
-              <View style={styles.desc}>
-                <Text>{merchantData.title}</Text>
-                <Text style={styles.textClaimed}>1 out of 10</Text>
-              </View>
-              <View style={styles.iconBar}>
-                <Image style={styles.iconBarImg} source={merchantIcon} />
-                <Image style={styles.iconBarImg} source={addIcon} />
-                <Image style={styles.iconBarImg} source={shareIcon} />
-                <Image style={styles.iconBarImg} source={likeIcon} />
-                <Text>1</Text>
-              </View>
+          </Animated.ScrollView>
+          <Animated.View  
+            pointerEvents="none"
+            style={[
+              styles.header,
+              { transform: [{ translateY: headerTranslate }] },
+            ]}>
+            {/* <Image style={styles.profileImg} source={{uri:this.state.merchantData.user.avatar}} /> */}
+      
+            <Image style={styles.headerBackgroundImage} source={img} />
+            <View style={styles.avatarRow}>
+              <AvatarCircle />
             </View>
-            <View style={styles.itemTitleBar}>
-              <View style={styles.profileImgTitle}>
-                <Image style={styles.profileImg} source={profileImage} />
-                <View>
-                  <Text style={styles.text}>{merchantData.title}</Text>
-                  <Text style={styles.textDate}>{date}</Text>
-                </View>
-              </View>
-              <Image style={styles.followUserImg} source={followUserImg} />
-                    
-            </View>
-            <Image style={styles.itemImage} source={img} />
-            <View style={styles.descIconBar}>
-              <View style={styles.desc}>
-                <Text>{merchantData.title}</Text>
-                <Text style={styles.textClaimed}>1 out of 10</Text>
-              </View>
-              <View style={styles.iconBar}>
-                <Image style={styles.iconBarImg} source={merchantIcon} />
-                <Image style={styles.iconBarImg} source={addIcon} />
-                <Image style={styles.iconBarImg} source={shareIcon} />
-                <Image style={styles.iconBarImg} source={likeIcon} />
-                <Text>1</Text>
-              </View>
-            </View>
-            <View style={styles.itemTitleBar}>
-              <View style={styles.profileImgTitle}>
-                <Image style={styles.profileImg} source={profileImage} />
-                <View>
-                  <Text style={styles.text}>{merchantData.title}</Text>
-                  <Text style={styles.textDate}>{date}</Text>
-                </View>
-              </View>
-              <Image style={styles.followUserImg} source={followUserImg} />
-                    
-            </View>
-            <Image style={styles.itemImage} source={img} />
-            <View style={styles.descIconBar}>
-              <View style={styles.desc}>
-                <Text>{merchantData.title}</Text>
-                <Text style={styles.textClaimed}>1 out of 10</Text>
-              </View>
-              <View style={styles.iconBar}>
-                <Image style={styles.iconBarImg} source={merchantIcon} />
-                <Image style={styles.iconBarImg} source={addIcon} />
-                <Image style={styles.iconBarImg} source={shareIcon} />
-                <Image style={styles.iconBarImg} source={likeIcon} />
-                <Text>1</Text>
-              </View>
-            </View>
-            <View style={styles.itemTitleBar}>
-              <View style={styles.profileImgTitle}>
-                <Image style={styles.profileImg} source={profileImage} />
-                <View>
-                  <Text style={styles.text}>{merchantData.title}</Text>
-                  <Text style={styles.textDate}>{date}</Text>
-                </View>
-              </View>
-              <Image style={styles.followUserImg} source={followUserImg} />
-                    
-            </View>
-            <Image style={styles.itemImage} source={img} />
-            <View style={styles.descIconBar}>
-              <View style={styles.desc}>
-                <Text>{merchantData.title}</Text>
-                <Text style={styles.textClaimed}>1 out of 10</Text>
-              </View>
-              <View style={styles.iconBar}>
-                <Image style={styles.iconBarImg} source={merchantIcon} />
-                <Image style={styles.iconBarImg} source={addIcon} />
-                <Image style={styles.iconBarImg} source={shareIcon} />
-                <Image style={styles.iconBarImg} source={likeIcon} />
-                <Text>1</Text>
-              </View>
-            </View>
-          </ScrollView>
-     
+          </Animated.View>
         </View>
       );
 
@@ -185,14 +134,22 @@ export default class MerchantProfile extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  avatarRow:{
+    width:'100%',
+    height:'100%',
+    backgroundColor:'green'
+  },
+  scrollViewContent:{
+    marginTop: HEADER_MAX_HEIGHT,
+    zIndex:0
+  },
   fill:{
     flex:1
   },
   container: {
+    position:'relative',
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop:30,
-    marginBottom:20
+    backgroundColor: '#2f1b3e',
   },
   itemTitleBar:{
     flexDirection:'row',
@@ -214,7 +171,7 @@ const styles = StyleSheet.create({
   },
   itemImage:{
     width:'100%',
-    height:HEADER_MAX_HEIGHT,
+    height:150,
     backgroundColor:'fuchsia',
   },
   headerBackgroundImage:{
@@ -270,5 +227,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#03A9F4',
     overflow: 'hidden',
     height: HEADER_MAX_HEIGHT,
+    zIndex:1
   }
 });

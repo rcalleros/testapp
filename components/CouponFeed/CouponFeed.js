@@ -24,7 +24,6 @@ export default class CouponFeed extends React.Component {
 }
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#2f1b3e',
     paddingTop:0,
     paddingLeft:5,
     paddingRight:5

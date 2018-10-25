@@ -1,8 +1,7 @@
 import React from 'react';
-import {Text} from 'react-native';
+import { Text, View, StyleSheet} from 'react-native';
 
 import CouponFeed from '../components/CouponFeed/CouponFeed';
-import MerchantProfile from '../components/MerchantProfile/MerchantProfile';
 import Ajax from '../services/Ajax';
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -35,14 +34,11 @@ export default class HomeScreen extends React.Component {
     return this.state.deals.find((deal)=> deal.key == this.state.currentMerchantId);
   }
   render() {
-    // if(this.state.currentMerchantId){
-    //   return (
-    //     <MerchantProfile onBack={this.unsetCurrentMerchant} initialMerchantData={this.getCurrentDeal()}/>
-    //   );
-    // }
     if(this.state.deals.length > 0){
       return (
-        <CouponFeed coupons={this.state.deals} onMerchantPress={this.setCurrentMerchant} />
+        <View style={styles.container}>
+          <CouponFeed coupons={this.state.deals} onMerchantPress={this.setCurrentMerchant} />
+        </View>
       );
     }
     return <Text>You have nothing to show</Text>;
@@ -53,3 +49,10 @@ export default class HomeScreen extends React.Component {
 
 }
 
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#2f1b3e',
+    paddingTop:0,
+    paddingLeft:5,
+    paddingRight:5
+  }});
