@@ -1,11 +1,11 @@
 import React from 'react';
-import { StatusBar, Platform, ScrollView, TouchableOpacity, Image, View, Text, StyleSheet, Animated } from 'react-native';
+import { Button,StatusBar, Platform, ScrollView, TouchableOpacity, Image, View, Text, StyleSheet, Animated } from 'react-native';
 import PropTypes from  'prop-types';
 import Ajax from '../../services/Ajax';
 import AvatarCircle from '../../components/shared/AvatarCircle';
 
 
-const HEADER_MAX_HEIGHT = 200;
+const HEADER_MAX_HEIGHT = 300;
 const HEADER_MIN_HEIGHT = Platform.OS === 'ios' ? 60 : 73; 
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 const BackBtn = ({navigate})=><TouchableOpacity style={{zIndex:2}} onPress={()=>{navigate.goBack();}}><Text> &#60; BACK</Text></TouchableOpacity>;
@@ -115,7 +115,6 @@ export default class MerchantProfile extends React.Component {
             </View>
           </Animated.ScrollView>
           <Animated.View  
-            pointerEvents="none"
             style={[
               styles.header,
               { transform: [{ translateY: headerTranslate }] },
@@ -124,7 +123,19 @@ export default class MerchantProfile extends React.Component {
       
             <Image style={styles.headerBackgroundImage} source={img} />
             <View style={styles.avatarRow}>
-              <AvatarCircle />
+              <AvatarCircle 
+              width={75}/>
+            </View>
+            <View style={styles.headerBtnsContainer}>
+              <Button title="button"  onPress={(e)=>{console.log(e);}}>
+                <Text>Button 1</Text>
+              </Button >
+              <Button title="button"  >
+                <Text>Button 2</Text>
+              </Button >
+              <Button title="button" >
+                <Text>Button 3</Text>
+              </Button >
             </View>
           </Animated.View>
         </View>
@@ -135,9 +146,21 @@ export default class MerchantProfile extends React.Component {
 
 const styles = StyleSheet.create({
   avatarRow:{
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center',
     width:'100%',
     height:'100%',
-    backgroundColor:'green'
+    zIndex:2
+  },
+  headerBtnsContainer:{
+    width:'100%',
+    position:'absolute',
+    backgroundColor:'yellow',
+    flex:1,
+    justifyContent:'center',
+    flexDirection:'row',
+    bottom:0
   },
   scrollViewContent:{
     marginTop: HEADER_MAX_HEIGHT,
@@ -172,7 +195,6 @@ const styles = StyleSheet.create({
   itemImage:{
     width:'100%',
     height:150,
-    backgroundColor:'fuchsia',
   },
   headerBackgroundImage:{
     position: 'absolute',
@@ -180,8 +202,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     width: null,
-    height: HEADER_MAX_HEIGHT,
+    height:'50%',
     resizeMode: 'cover',
+    zIndex:0
   },
   profileImg:{
     width:30,
@@ -220,13 +243,13 @@ const styles = StyleSheet.create({
     width:'50%'
   },
   header:{
-    position: 'absolute',
+    position:"absolute",
     top: 0,
     left: 0,
     right: 0,
     backgroundColor: '#03A9F4',
     overflow: 'hidden',
     height: HEADER_MAX_HEIGHT,
-    zIndex:1
+    zIndex:2
   }
 });
