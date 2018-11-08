@@ -7,9 +7,11 @@ import HomeScreen from '../screens/HomeScreen';
 import LinksScreen from '../screens/LinksScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import MerchantProfile from '../components/MerchantProfile/MerchantProfile';
+import FollowersList from '../components/FollowersList/FollowersList';
 const HomeStack = createStackNavigator({
   Home: HomeScreen,
-  MerchantProfile: MerchantProfile
+  MerchantProfile: MerchantProfile,
+  FollowersList: FollowersList
 });
 
 HomeStack.navigationOptions = {

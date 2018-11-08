@@ -7,6 +7,10 @@ import AvatarCircle from '../../components/shared/AvatarCircle';
 
 
 export default class AnimatedHeader extends React.Component {
+  static propTypes ={
+    headerMaxheight: PropTypes.array.isRequired,
+    onMerchantPress: PropTypes.func.isRequired
+  }
   constructor(props){
     super(props);
 

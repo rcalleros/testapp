@@ -3,54 +3,34 @@ import { Button,StatusBar, Platform, ScrollView, TouchableOpacity, Image, View, 
 import PropTypes from  'prop-types';
 import Ajax from '../../services/Ajax';
 import AvatarCircle from '../../components/shared/AvatarCircle';
+import TabsContainer from './TabsContainer';
 
 
 const HEADER_MAX_HEIGHT = 300;
 const HEADER_MIN_HEIGHT = Platform.OS === 'ios' ? 60 : 73; 
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
-const BackBtn = ({navigate})=><TouchableOpacity style={{zIndex:2}} onPress={()=>{navigate.goBack();}}><Text> &#60; BACK</Text></TouchableOpacity>;
+const BackBtn = ({navigate})=><TouchableOpacity style={styles.backBtn} onPress={()=>{navigate.goBack();}}><Text> &#60; BACK</Text></TouchableOpacity>;
 
-const Filler = ({merchantData}) =>{
-  const img = {
-    uri: merchantData.media[0]
-  };
-  const profileImage = require('../../assets/images/profile-pic.png');
-  const followUserImg = require('../../assets/images/user_follow_add.imageset/follow_add.png');
-  const merchantIcon = require('../../assets/images/feed_merchant.imageset/feed_merchant.png');
-  const addIcon = require('../../assets/images/feed_add_promo.imageset/feed_add_promo.png');
-  const shareIcon = require('../../assets/images/feed_share.imageset/feed_share.png');
-  const likeIcon = require('../../assets/images/feed_like.imageset/feed_like.png');
-  const date = 'October 18, 2018';
-  return(
-    <View style={styles.fillerContainer}>
-      <View style={styles.itemTitleBar}>
-        <View style={styles.profileImgTitle}>
-          <Image style={styles.profileImg} source={profileImage} />
-          <View>
-            <Text style={styles.text}>{merchantData.title}</Text>
-            <Text style={styles.textDate}>{date}</Text>
-          </View>
-        </View>
-        <Image style={styles.followUserImg} source={followUserImg} />
-      </View>
-      <Image style={styles.itemImage} source={img} />
-      <View style={styles.descIconBar}>
-        <View style={styles.desc}>
-          <Text>{merchantData.title}</Text>
-          <Text style={styles.textClaimed}>1 out of 10</Text>
-        </View>
-        <View style={styles.iconBar}>
-          <Image style={styles.iconBarImg} source={merchantIcon} />
-          <Image style={styles.iconBarImg} source={addIcon} />
-          <Image style={styles.iconBarImg} source={shareIcon} />
-          <Image style={styles.iconBarImg} source={likeIcon} />
-          <Text>1</Text>
-        </View>
-      </View>
-    </View>
-  );
-
-};
+//DEFINE TOUCHABLE BUTTONS WITH STAT COUNTER
+const StatBtnsConfig = [
+  {
+    text:'Followers',
+    route:'FollowersList',
+    className:'followers'
+  },
+  {
+    text:'Reviews',
+    route:'FollowersList',
+    className:'reviewBtn'
+  },
+  {
+    text:'Locations',
+    route:'FollowersList',
+    className:'reviews'
+  }
+];
+//DEFINE TABS FOR THE BOTTOM TAB CONTAINER
+const TabsConfig = [{name:'Gift Cards'},{name:'Promos'},{name:'Punch Cards'}];
 
 
 
@@ -61,23 +41,55 @@ export default class MerchantProfile extends React.Component {
     };
     constructor(props){
       super(props);
-
+      this.state = {
+        merchantData: this.props.navigation.getParam('initialMerchantData'),
+        scrollY: new Animated.Value(0),
+        activeContent: 'Gift Cards',
+        isLoaded:false
+      };
      
     }
-    state = {
-      merchantData: this.props.navigation.getParam('initialMerchantData'),
-      scrollY: new Animated.Value(0)
-    }
+ 
     async componentDidMount(){
-      const merchantData = await Ajax.fetchMerchantProfile(this.state.merchantData.key);
-      // console.log(merchantData);
-      // console.log(merchantData.user.avatar);
-      this.setState({merchantData});
+      await this.fetchData().done();
     }
-    _renderFiller = () => {
-      const data = Array.from({length: 30});
-      const Fillers = data.map((_,i)=><Filler merchantData={this.state.merchantData} key={i}/>);
-      return Fillers;
+
+    async fetchData(){
+      const merchantData = await Ajax.fetchMerchantProfile(this.state.merchantData.key);
+      await this.promisedSetState({merchantData: merchantData, isLoaded:true});
+    }
+
+    promisedSetState = (newState) => {
+      return new Promise((resolve) => {
+        this.setState(newState, () => {
+          resolve();
+        });
+      });
+    }
+
+    _renderNav=()=>{
+      const NavBtns = TabsConfig.map((item, i)=>{
+        return <TouchableOpacity onPress={()=>{this.onClickSetActiveContent(item.name)}} style={styles.navBtn} key={i} ><Text>{item.name}</Text></TouchableOpacity>;
+      });
+      return <View style={styles.navRow}>{NavBtns}</View>;
+    }
+    _renderStatBtns=()=>{
+      const StatBtns = StatBtnsConfig.map((item, i)=>{
+        return (
+          <TouchableOpacity onPress={()=>{this.onTouchRouteTo(item.route)}} style={[styles.statBtn,styles[item.className]]} key={i} >
+            <Text style={{textAlign:'center'}}>999</Text>
+            <Text>{item.text}</Text>
+          </TouchableOpacity>
+        );
+      });
+      return <View style={styles.statBtnsContainer}>{StatBtns}</View>;
+    }
+    onClickSetActiveContent = (activeContent)=>{
+      this.setState({activeContent:activeContent});
+    }
+    onTouchRouteTo = (route)=>{
+      const { navigate } = this.props.navigation;
+      navigate(route);
     }
     render(){
       const img = {
@@ -93,17 +105,51 @@ export default class MerchantProfile extends React.Component {
         outputRange: [0, -HEADER_SCROLL_DISTANCE],
         extrapolate: 'clamp',
       });
+      const imageOpacity = scrollY.interpolate({
+        inputRange: [0, 50,50],
+        outputRange: [1, 1, 0],
+        extrapolate: 'clamp',
+      });
 
       return(
         <View style={styles.container}>
           <StatusBar  translucent={false}  />
           <BackBtn navigate={this.props.navigation} />
+
+          <Animated.View 
+            pointerEvents="box-none" 
+            style={[
+              styles.header,
+              { transform: [{ translateY: headerTranslate }] },
+            ]}>
+            <View style={styles.avatarRow}>
+              <Image
+                style={styles.headerBackgroundImage}
+                source={img} 
+              />
+              <AvatarCircle
+                imageOpacity={imageOpacity}
+                avatarUri={this.state.isLoaded ? this.state.merchantData.user.avatar : ''} 
+                width={75}/>
+              <Text style={styles.nameText}>{this.state.isLoaded ? this.state.merchantData.user.name : 'Some User'} </Text>
+            </View>
+            <View style={styles.headerBtnsContainer}>
+              {this._renderStatBtns()}
+              {this._renderNav()}
+            </View>
+
+          </Animated.View>
       
           <Animated.ScrollView 
             styles={styles.fill}
             scrollEventThrottle={1}
             onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }]
+              [{ nativeEvent: { 
+                contentOffset: { 
+                  y: this.state.scrollY 
+                },
+              } }],
+              {useNativeDriver: true}
             )}
             contentInset={{
               top: HEADER_MAX_HEIGHT,
@@ -111,33 +157,11 @@ export default class MerchantProfile extends React.Component {
           
           >
             <View style={styles.scrollViewContent}>
-              {this._renderFiller()}
+              <TabsContainer activeContent={this.state.activeContent} />
             </View>
+
           </Animated.ScrollView>
-          <Animated.View  
-            style={[
-              styles.header,
-              { transform: [{ translateY: headerTranslate }] },
-            ]}>
-            {/* <Image style={styles.profileImg} source={{uri:this.state.merchantData.user.avatar}} /> */}
-      
-            <Image style={styles.headerBackgroundImage} source={img} />
-            <View style={styles.avatarRow}>
-              <AvatarCircle 
-              width={75}/>
-            </View>
-            <View style={styles.headerBtnsContainer}>
-              <Button title="button"  onPress={(e)=>{console.log(e);}}>
-                <Text>Button 1</Text>
-              </Button >
-              <Button title="button"  >
-                <Text>Button 2</Text>
-              </Button >
-              <Button title="button" >
-                <Text>Button 3</Text>
-              </Button >
-            </View>
-          </Animated.View>
+         
         </View>
       );
 
@@ -147,24 +171,50 @@ export default class MerchantProfile extends React.Component {
 const styles = StyleSheet.create({
   avatarRow:{
     flex:1,
-    justifyContent:'center',
     alignItems:'center',
+    justifyContent:'center',
+    // width:'100%',
+    height:150,
+    zIndex:2,
+  },
+  nameText:{
+    position:'absolute',
+    bottom:10,
+    right:0,
+    left:0,
+    backgroundColor:'white',
     width:'100%',
-    height:'100%',
-    zIndex:2
+    textAlign:'center',
   },
   headerBtnsContainer:{
     width:'100%',
-    position:'absolute',
-    backgroundColor:'yellow',
-    flex:1,
+    position:'relative',
+    bottom:0,
+    zIndex:3,
+  },
+  statBtnsContainer:{
+    width:'100%',
     justifyContent:'center',
     flexDirection:'row',
-    bottom:0
+    zIndex:3,
+    paddingTop:15,
+    paddingBottom:15,
+  },
+  statBtn:{
+    padding:20,
+    paddingBottom:10,
+    paddingTop:10,
+  },
+  reviewBtn:{
+    borderRightWidth:2,
+    borderRightColor:'#2f1b3e',
+    borderLeftWidth:2,
+    borderLeftColor:'#2f1b3e'
   },
   scrollViewContent:{
+    backgroundColor:'fuchsia',
     marginTop: HEADER_MAX_HEIGHT,
-    zIndex:0
+    // zIndex:0
   },
   fill:{
     flex:1
@@ -173,28 +223,6 @@ const styles = StyleSheet.create({
     position:'relative',
     flex: 1,
     backgroundColor: '#2f1b3e',
-  },
-  itemTitleBar:{
-    flexDirection:'row',
-    alignItems:'center',
-    paddingTop:15,
-    paddingBottom:15,
-    paddingLeft:5,
-    paddingRight:5,
-    justifyContent:'space-between',
-    borderBottomWidth:1,
-    borderBottomColor:'#999999'
-  },
-  profileImgTitle:{
-    flexDirection:'row',
-    alignItems:'center',
-  },
-  textDate:{
-    color:'#999999'
-  },
-  itemImage:{
-    width:'100%',
-    height:150,
   },
   headerBackgroundImage:{
     position: 'absolute',
@@ -206,50 +234,21 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     zIndex:0
   },
-  profileImg:{
-    width:30,
-    height:30,
-    borderRadius:50,
-    marginRight:5
-  },
-  followUserImg:{
-    width:20,
-    height:20
-  },
-  descIconBar:{
-    paddingLeft:5,
-    flexDirection:'row',
-    justifyContent:'space-between'
-  },
-  iconBar:{
-    width:'50%',
-    flexDirection:'row',
-    alignItems:'center',
-    justifyContent:'space-between'
-  },
-  iconBarImg:{
-    width:20,
-    height:20,
-    marginLeft:10
-  },
-  textClaimed:{
-    color:'#999999',
-       
-    paddingTop:10,
-    paddingBottom:10,
-  },
-  desc:{
-    paddingTop:20,
-    width:'50%'
-  },
   header:{
-    position:"absolute",
+    position:'absolute',
     top: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#03A9F4',
-    overflow: 'hidden',
+    backgroundColor: 'yellow',
     height: HEADER_MAX_HEIGHT,
-    zIndex:2
-  }
+    zIndex:2,
+    borderWidth:2,
+    borderColor:'purple'
+  },
+  backBtn:{
+    padding:10,
+    position:'absolute',
+    zIndex:4,
+    top:0,
+    backgroundColor:'green'}
 });
