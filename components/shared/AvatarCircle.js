@@ -1,5 +1,5 @@
 import React from 'react';
-import {  View, Animated } from 'react-native';
+import {  View, Image } from 'react-native';
 import PropTypes from  'prop-types';
 
 
@@ -37,10 +37,10 @@ export default class AvatarCircle extends React.Component {
         this.setWidthHeight(),
         {borderRadius:50,overflow:'hidden'},
         
-        ]}>
-        <Animated.Image style={[
-          this.setWidthHeight(),
-        {opacity: this.props.imageOpacity}
+      ]}>
+        <Image style={[
+          this.setWidthHeight()
+       
       ]} 
         source={this.props.avatarUri != '' ? img : profilePlacholderImage } />
       </View>

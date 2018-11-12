@@ -4,6 +4,7 @@ import PropTypes from  'prop-types';
 import Ajax from '../../services/Ajax';
 import AvatarCircle from '../../components/shared/AvatarCircle';
 import TabsContainer from './TabsContainer';
+import AnimateWithProps from '../../components/shared/AnimateWithProps';
 
 
 const HEADER_MAX_HEIGHT = 300;
@@ -106,8 +107,8 @@ export default class MerchantProfile extends React.Component {
         extrapolate: 'clamp',
       });
       const imageOpacity = scrollY.interpolate({
-        inputRange: [0, 50,50],
-        outputRange: [1, 1, 0],
+        inputRange: [0, 50],
+        outputRange: [1, 0],
         extrapolate: 'clamp',
       });
 
@@ -127,10 +128,11 @@ export default class MerchantProfile extends React.Component {
                 style={styles.headerBackgroundImage}
                 source={img} 
               />
-              <AvatarCircle
-                imageOpacity={imageOpacity}
-                avatarUri={this.state.isLoaded ? this.state.merchantData.user.avatar : ''} 
-                width={75}/>
+              <AnimateWithProps style={{opacity:imageOpacity}}>
+                <AvatarCircle
+                  avatarUri={this.state.isLoaded ? this.state.merchantData.user.avatar : ''} 
+                  width={75}/>
+              </AnimateWithProps>
               <Text style={styles.nameText}>{this.state.isLoaded ? this.state.merchantData.user.name : 'Some User'} </Text>
             </View>
             <View style={styles.headerBtnsContainer}>
