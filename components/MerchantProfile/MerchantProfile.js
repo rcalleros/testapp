@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button,StatusBar, Platform, ScrollView, TouchableOpacity, Image, View, Text, StyleSheet, Animated } from 'react-native';
+import { StatusBar, Platform, TouchableOpacity, Image, View, Text, StyleSheet, Animated } from 'react-native';
 import PropTypes from  'prop-types';
 import Ajax from '../../services/Ajax';
 import AvatarCircle from '../../components/shared/AvatarCircle';
@@ -36,7 +36,6 @@ const TabsConfig = [{name:'Gift Cards'},{name:'Promos'},{name:'Punch Cards'}];
 
 
 export default class MerchantProfile extends React.Component {
- 
     static navigationOptions = {
       header: null,
     };
@@ -70,14 +69,14 @@ export default class MerchantProfile extends React.Component {
 
     _renderNav=()=>{
       const NavBtns = TabsConfig.map((item, i)=>{
-        return <TouchableOpacity onPress={()=>{this.onClickSetActiveContent(item.name)}} style={styles.navBtn} key={i} ><Text>{item.name}</Text></TouchableOpacity>;
+        return <TouchableOpacity onPress={()=>{this.onClickSetActiveContent(item.name);}} style={styles.navBtn} key={i} ><Text>{item.name}</Text></TouchableOpacity>;
       });
       return <View style={styles.navRow}>{NavBtns}</View>;
     }
     _renderStatBtns=()=>{
       const StatBtns = StatBtnsConfig.map((item, i)=>{
         return (
-          <TouchableOpacity onPress={()=>{this.onTouchRouteTo(item.route)}} style={[styles.statBtn,styles[item.className]]} key={i} >
+          <TouchableOpacity onPress={()=>{this.onTouchRouteTo(item.route);}} style={[styles.statBtn,styles[item.className]]} key={i} >
             <Text style={{textAlign:'center'}}>999</Text>
             <Text>{item.text}</Text>
           </TouchableOpacity>

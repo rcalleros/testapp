@@ -1,9 +1,12 @@
-const tintColor = '#2f95dc';
+const primaryColor = '#660066';
+const secondaryColor = '#946799';
+const tintColor = '#660066';
 
 export default {
+  primaryColor:primaryColor,
   tintColor,
-  tabIconDefault: '#ccc',
-  tabIconSelected: tintColor,
+  tabIconDefault: '#52535C',
+  tabIconSelected: secondaryColor,
   tabBar: '#fefefe',
   errorBackground: 'red',
   errorText: '#fff',
