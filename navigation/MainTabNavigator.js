@@ -14,7 +14,8 @@ import HomeIcon from '../components/Icons/HomeIcon';
 import SearchIcon from '../components/Icons/SearchIcon';
 import AppIcon from '../components/Icons/AppIcon';
 import Colors from '../constants/Colors';
-
+import CustomTabButton from './CustomTabButton';
+import CustomTabBar from './CustomTabBar';
 
 const HomeStack = createStackNavigator({
   Home: HomeScreen,
@@ -27,19 +28,7 @@ HomeStack.navigationOptions = {
     <HomeIcon isActive={focused} />
   ),
 };
-// HomeStack.navigationOptions = {
-//   tabBarLabel: 'Home',
-//   tabBarIcon: ({ focused }) => (
-//     <TabBarIcon
-//       focused={focused}
-//       name={
-//         Platform.OS === 'ios'
-//           ? `ios-information-circle${focused ? '' : '-outline'}`
-//           : 'md-information-circle'
-//       }
-//     />
-//   ),
-// };
+
 const SyncMerchantsStack = createStackNavigator({
   SyncMerchants: SyncMerchantsScreen,
 });
@@ -91,14 +80,19 @@ SettingsStack.navigationOptions = {
 export default createBottomTabNavigator({
   HomeStack,
   SyncMerchantsStack,
+  AddButton: {
+		screen: () => null,
+		navigationOptions: () => ({
+			tabBarIcon: (<CustomTabButton />),
+			tabBarOnPress: ({navigation}) => {
+        navigation.navigate('NewTrade');
+      }
+		})
+	},
   NewTradeStack,
   LinksStack,
   SettingsStack,
-},{
-  tabBarOptions:{
-    showLabel:false,
-    style:{
-      backgroundColor:Colors.primaryColor
-    }
-  }
+},
+{
+  tabBarComponent:CustomTabBar
 });

@@ -23,7 +23,6 @@ export default class AvatarCircle extends React.Component {
       width:this.props.width,
       height:this.props.width
     };
-    console.log(this.props.imageOpacity);
     return styles;
   }
   render(){

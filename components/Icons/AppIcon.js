@@ -1,5 +1,5 @@
 import React from 'react';
-import {Image,StyleSheet} from 'react-native';
+import {Image,StyleSheet,View} from 'react-native';
 
 import PropTypes from  'prop-types';
 
@@ -11,11 +11,14 @@ export default class AppIcon extends React.Component {
       const image = require('../../assets/images/AppIcon.appiconset/Icon-76.png');
 
       return (
-        <Image style={[styles.icon]} source={image}/>
+        <Image style={styles.icon} source={image}/>
       );
     }
 }
 const styles = StyleSheet.create({
-  height: 20,
-  width:20,
+  icon:{
+    height: 50,
+    width:50,
+    zIndex:5
+  }
 });
